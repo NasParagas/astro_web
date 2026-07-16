@@ -18,10 +18,26 @@ a {
   color: #2563eb;
 }
 
-.container {
-  width: min(920px, calc(100% - 32px));
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  width: min(1200px, 100%);
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 64px 0;
+}
+
+.content {
+  max-width: 760px;
+  padding: 64px 32px;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .content {
+    padding: 32px 16px;
+  }
 }
 
 .hero {
@@ -49,19 +65,4 @@ a {
   color: #475569;
   font-size: 1.125rem;
   line-height: 1.8;
-}
-
-.crumbs {
-  margin-bottom: 32px;
-  font-size: 0.9rem;
-}
-
-.crumbs a {
-  color: #64748b;
-  text-decoration: none;
-}
-
-.crumbs a:hover {
-  color: #1f2937;
-  text-decoration: underline;
 }

@@ -1,0 +1,129 @@
+---
+import { getCollection } from "astro:content";
+
+const byDateDesc = (
+  a: { data: { date: Date } },
+  b: { data: { date: Date } },
+) => b.data.date.valueOf() - a.data.date.valueOf();
+
+const sections = [
+  { href: "/dev/", label: "dev", notes: (await getCollection("dev")).sort(byDateDesc) },
+  { href: "/recipe/", label: "recipe", notes: (await getCollection("recipe")).sort(byDateDesc) },
+];
+
+// 末尾スラッシュの有無を揃えてから現在ページと比較する
+const current = Astro.url.pathname.replace(/\/+$/, "") + "/";
+const ariaCurrent = (href: string) => (current === href ? "page" : undefined);
+---
+
+<aside class="sidebar">
+  <a href="/" class="site-name" aria-current={ariaCurrent("/")}>
+    NasParagas's home
+  </a>
+
+  {
+    sections.map((section) => (
+      <nav class="section">
+        <a href={section.href} class="section-title" aria-current={ariaCurrent(section.href)}>
+          {section.label}
+        </a>
+        {section.notes.length > 0 && (
+          <ul>
+            {section.notes.map((note) => (
+              <li>
+                <a
+                  href={`${section.href}${note.id}/`}
+                  aria-current={ariaCurrent(`${section.href}${note.id}/`)}
+                >
+                  {note.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </nav>
+    ))
+  }
+</aside>
+
+<style>
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 48px 24px;
+    border-right: 1px solid #e5e7eb;
+  }
+  .site-name {
+    display: block;
+    margin-bottom: 32px;
+    color: #111827;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .site-name:hover {
+    text-decoration: underline;
+  }
+  .section {
+    margin-bottom: 28px;
+  }
+  .section-title {
+    display: block;
+    margin-bottom: 8px;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .section-title:hover {
+    color: #1f2937;
+  }
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  li a {
+    display: block;
+    padding: 4px 8px;
+    color: #475569;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    text-decoration: none;
+    border-radius: 8px;
+  }
+  li a:hover {
+    color: #111827;
+    background: #f1f5f9;
+  }
+  a[aria-current="page"] {
+    color: #111827;
+    font-weight: 600;
+  }
+  li a[aria-current="page"] {
+    background: #e2e8f0;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      position: static;
+      max-height: none;
+      padding: 24px 16px;
+      border-right: none;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .site-name {
+      margin-bottom: 16px;
+    }
+    .section {
+      margin-bottom: 16px;
+    }
+  }
+</style>

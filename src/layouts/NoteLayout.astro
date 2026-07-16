@@ -5,11 +5,9 @@ interface Props {
   title: string;
   date: Date;
   description?: string;
-  backHref: string;
-  backLabel: string;
 }
 
-const { title, date, description, backHref, backLabel } = Astro.props;
+const { title, date, description } = Astro.props;
 const formattedDate = date.toLocaleDateString("ja-JP", {
   year: "numeric",
   month: "long",
@@ -18,10 +16,6 @@ const formattedDate = date.toLocaleDateString("ja-JP", {
 ---
 
 <BaseLayout title={`${title} | NasParagas's home`} description={description}>
-  <nav class="crumbs">
-    <a href={backHref}>← {backLabel}</a>
-  </nav>
-
   <header class="note-header">
     <h1>{title}</h1>
     <p class="date">
