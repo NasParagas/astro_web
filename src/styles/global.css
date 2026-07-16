@@ -12,6 +12,7 @@ body {
     sans-serif;
   color: #1f2937;
   background: #f8fafc;
+  overflow-wrap: break-word;
 }
 
 a {
@@ -33,7 +34,8 @@ a {
 
 @media (max-width: 768px) {
   .layout {
-    grid-template-columns: 1fr;
+    /* 1frだと中身(コードブロック等)の最小幅より縮まず横はみ出しするのでminmaxで0まで許可 */
+    grid-template-columns: minmax(0, 1fr);
   }
   .content {
     padding: 32px 16px;
