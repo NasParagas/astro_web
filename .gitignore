@@ -7,6 +7,8 @@ dist/
 # Astro internal and cache files
 .astro/
 
+.wrangler
+
 # Environment variables
 .env
 .env.*
