@@ -1,0 +1,114 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  title: string;
+  date: Date;
+  description?: string;
+  backHref: string;
+  backLabel: string;
+}
+
+const { title, date, description, backHref, backLabel } = Astro.props;
+const formattedDate = date.toLocaleDateString("ja-JP", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+---
+
+<BaseLayout title={`${title} | NasParagas's home`} description={description}>
+  <nav class="crumbs">
+    <a href={backHref}>← {backLabel}</a>
+  </nav>
+
+  <header class="note-header">
+    <h1>{title}</h1>
+    <p class="date">
+      <time datetime={date.toISOString()}>{formattedDate}</time>
+    </p>
+  </header>
+
+  <article class="prose">
+    <slot />
+  </article>
+</BaseLayout>
+
+<style>
+  .note-header h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    line-height: 1.3;
+    color: #111827;
+  }
+  .date {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+  .note-header {
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  /* Markdown本文はスコープ外から来るので :global で当てる */
+  .prose {
+    line-height: 1.9;
+  }
+  .prose :global(h2) {
+    margin: 2.5em 0 0.75em;
+    padding-bottom: 0.3em;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .prose :global(h3) {
+    margin: 2em 0 0.5em;
+    font-size: 1.2rem;
+  }
+  .prose :global(p) {
+    margin: 1em 0;
+  }
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.5em;
+  }
+  .prose :global(li) {
+    margin: 0.4em 0;
+  }
+  .prose :global(code) {
+    padding: 0.15em 0.4em;
+    font-size: 0.9em;
+    background: #e2e8f0;
+    border-radius: 6px;
+  }
+  .prose :global(pre) {
+    padding: 16px 20px;
+    overflow-x: auto;
+    border-radius: 12px;
+  }
+  .prose :global(pre code) {
+    padding: 0;
+    background: none;
+  }
+  .prose :global(blockquote) {
+    margin: 1em 0;
+    padding: 0.25em 1.25em;
+    color: #475569;
+    border-left: 4px solid #cbd5e1;
+  }
+  .prose :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+  }
+  .prose :global(th),
+  .prose :global(td) {
+    padding: 6px 12px;
+    border: 1px solid #e5e7eb;
+  }
+</style>
