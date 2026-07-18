@@ -17,7 +17,30 @@ const noteSchema = z.object({
 const keepFilename = ({ entry }: { entry: string }) =>
   entry.replace(/\.[^.]+$/, "");
 
+// CI(Cloudflare Workers Buildsなど)は最新コミットだけの浅いクローンをするため、
+// そのままだと全ファイルの作成日がpush日になってしまう。全履歴を取得して補う。
+let ensuredFullHistory = false;
+function ensureFullGitHistory() {
+  if (ensuredFullHistory) return;
+  ensuredFullHistory = true;
+  try {
+    const isShallow = execSync("git rev-parse --is-shallow-repository", {
+      encoding: "utf8",
+    }).trim();
+    if (isShallow === "true") {
+      execSync("git fetch --quiet --unshallow", { stdio: "pipe" });
+      console.info("[notes-loader] 浅いクローンだったため全履歴を取得しました");
+    }
+  } catch (error) {
+    console.warn(
+      "[notes-loader] git履歴の取得に失敗しました。作成日・更新日が不正確になる可能性があります:",
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
 function gitDates(filePath: string): { created: Date; updated: Date } {
+  ensureFullGitHistory();
   let isoDates: string[] = [];
   try {
     isoDates = execSync(`git log --follow --format=%aI -- "${filePath}"`, {
