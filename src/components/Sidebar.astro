@@ -1,14 +1,10 @@
 ---
 import { getCollection } from "astro:content";
-
-const byDateDesc = (
-  a: { data: { date: Date } },
-  b: { data: { date: Date } },
-) => b.data.date.valueOf() - a.data.date.valueOf();
+import { sortByCreatedDesc } from "../lib/dates";
 
 const sections = [
-  { href: "/dev/", label: "dev", notes: (await getCollection("dev")).sort(byDateDesc) },
-  { href: "/recipe/", label: "recipe", notes: (await getCollection("recipe")).sort(byDateDesc) },
+  { href: "/dev/", label: "dev", notes: sortByCreatedDesc(await getCollection("dev")) },
+  { href: "/recipe/", label: "recipe", notes: sortByCreatedDesc(await getCollection("recipe")) },
 ];
 
 // 末尾スラッシュの有無を揃えてから現在ページと比較する

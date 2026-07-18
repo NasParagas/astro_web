@@ -1,26 +1,32 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 import Comments from "../components/Comments.astro";
+import { formatDate } from "../lib/dates";
 
 interface Props {
   title: string;
-  date: Date;
+  created: Date;
+  updated: Date;
   description?: string;
 }
 
-const { title, date, description } = Astro.props;
-const formattedDate = date.toLocaleDateString("ja-JP", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
+const { title, created, updated, description } = Astro.props;
+// 同じ日のうちの更新は表示しない
+const showUpdated = formatDate(updated) !== formatDate(created);
 ---
 
 <BaseLayout title={`${title} | NasParagas's home`} description={description}>
   <header class="note-header">
     <h1>{title}</h1>
     <p class="date">
-      <time datetime={date.toISOString()}>{formattedDate}</time>
+      <time datetime={created.toISOString()}>{formatDate(created)}</time>
+      {
+        showUpdated && (
+          <span class="updated">
+            (最終更新: <time datetime={updated.toISOString()}>{formatDate(updated)}</time>)
+          </span>
+        )
+      }
     </p>
   </header>
 

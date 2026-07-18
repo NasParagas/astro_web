@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { noteDates, formatDate, sortByCreatedDesc } from "../lib/dates";
 
 interface Props {
   notes: (CollectionEntry<"dev"> | CollectionEntry<"recipe">)[];
@@ -7,9 +8,7 @@ interface Props {
 }
 
 const { notes, basePath } = Astro.props;
-const sorted = [...notes].sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
+const sorted = sortByCreatedDesc(notes);
 ---
 
 {
@@ -17,23 +16,22 @@ const sorted = [...notes].sort(
     <p class="empty">まだメモがありません。</p>
   ) : (
     <ul class="note-list">
-      {sorted.map((note) => (
-        <li>
-          <a href={`${basePath}${note.id}/`} class="note-link">
-            <span class="note-title">{note.data.title}</span>
-            {note.data.description && (
-              <span class="note-description">{note.data.description}</span>
-            )}
-            <time class="note-date" datetime={note.data.date.toISOString()}>
-              {note.data.date.toLocaleDateString("ja-JP", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </time>
-          </a>
-        </li>
-      ))}
+      {sorted.map((note) => {
+        const { created } = noteDates(note);
+        return (
+          <li>
+            <a href={`${basePath}${note.id}/`} class="note-link">
+              <span class="note-title">{note.data.title}</span>
+              {note.data.description && (
+                <span class="note-description">{note.data.description}</span>
+              )}
+              <time class="note-date" datetime={created.toISOString()}>
+                {formatDate(created)}
+              </time>
+            </a>
+          </li>
+        );
+      })}
     </ul>
   )
 }
