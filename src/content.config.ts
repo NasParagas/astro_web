@@ -8,14 +8,30 @@ const noteSchema = z.object({
   date: z.coerce.date().optional(),
   description: z.string().optional(),
   tags: z.array(z.string()).default([]),
+  // URLを固定したいときに書く。書いておけばファイル名やディレクトリを変えても
+  // リンクが切れない(省略時はファイル名がそのままURLになる)
+  slug: z.string().optional(),
+  // giscusのコメント欄と紐づくキー。省略時はページのパス。
+  // slugを変えた(=URLを変えた)後も過去のコメントを残したいときだけ、
+  // 変更前のパス(例: /dev/old-name/)を書く
+  commentTerm: z.string().optional(),
   // 以下はloaderがgit履歴から自動で埋める(frontmatterには書かない)
   created: z.coerce.date().optional(),
   updated: z.coerce.date().optional(),
 });
 
-// デフォルトのIDはslug化(小文字化)されるので、ファイル名をそのままURLに使う
-const keepFilename = ({ entry }: { entry: string }) =>
-  entry.replace(/\.[^.]+$/, "");
+// デフォルトのIDはslug化(小文字化)されるので、ファイル名をそのままURLに使う。
+// frontmatterにslugがあればそちらを優先する
+const keepFilename = ({
+  entry,
+  data,
+}: {
+  entry: string;
+  data: Record<string, unknown>;
+}) => {
+  if (typeof data.slug === "string" && data.slug.length > 0) return data.slug;
+  return entry.replace(/\.[^.]+$/, "");
+};
 
 // CI(Cloudflare Workers Buildsなど)は最新コミットだけの浅いクローンをするため、
 // そのままだと全ファイルの作成日がpush日になってしまう。全履歴を取得して補う。

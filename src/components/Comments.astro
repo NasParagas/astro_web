@@ -1,7 +1,22 @@
 ---
 // giscus (https://giscus.app) のコメント欄。
 // コメントはGitHubリポジトリ NasParagas/astro_web のDiscussions
-// (Announcementsカテゴリ) に保存され、記事とはURLパスで紐づく。
+// (Announcementsカテゴリ) に保存される。
+//
+// 記事との紐づけはmapping="specific"で、ビルド時に決めたtermを使う。
+// giscus任せのpathname mappingだと記事のURLを変えた瞬間に過去のコメントが
+// 見えなくなるため、termをfrontmatter(commentTerm)で固定できるようにしている。
+// 既存のDiscussionと互換を保つため、デフォルト値はpathname mapping時代と同じ
+// 「末尾スラッシュ付きのパス」にしてある。
+
+interface Props {
+  term?: string;
+}
+
+const pathname = Astro.url.pathname.endsWith("/")
+  ? Astro.url.pathname
+  : `${Astro.url.pathname}/`;
+const term = Astro.props.term ?? pathname;
 ---
 
 <section class="comments">
@@ -12,7 +27,8 @@
     data-repo-id="R_kgDORsvREg"
     data-category="Announcements"
     data-category-id="DIC_kwDORsvREs4DBccb"
-    data-mapping="pathname"
+    data-mapping="specific"
+    data-term={term}
     data-strict="0"
     data-reactions-enabled="1"
     data-emit-metadata="0"

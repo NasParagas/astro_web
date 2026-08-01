@@ -8,9 +8,11 @@ interface Props {
   created: Date;
   updated: Date;
   description?: string;
+  // frontmatterのcommentTerm(省略時はComments側でページのパスを使う)
+  commentTerm?: string;
 }
 
-const { title, created, updated, description } = Astro.props;
+const { title, created, updated, description, commentTerm } = Astro.props;
 // 同じ日のうちの更新は表示しない
 const showUpdated = formatDate(updated) !== formatDate(created);
 ---
@@ -34,7 +36,7 @@ const showUpdated = formatDate(updated) !== formatDate(created);
     <slot />
   </article>
 
-  <Comments />
+  <Comments term={commentTerm} />
 </BaseLayout>
 
 <style>
