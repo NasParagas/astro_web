@@ -1,5 +1,7 @@
 ---
 title: MacのUTMへsshする
+tags: [mac, utm]
+slug: ssh-to-utm
 ---
 
 - UTMの設定から共有ネットワークにする
