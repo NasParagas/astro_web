@@ -1,0 +1,27 @@
+---
+// 「作成中」バッジ。完成しているメモでは何も描画しない。
+import { isWip, type Note } from "../lib/notes";
+
+interface Props {
+  note: Note;
+}
+
+const { note } = Astro.props;
+---
+
+{isWip(note) && <span class="status-badge">作成中</span>}
+
+<style>
+  .status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    color: var(--wip-text);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.6;
+    white-space: nowrap;
+    background: var(--wip-bg);
+    border: 1px solid var(--wip-border);
+    border-radius: 999px;
+  }
+</style>

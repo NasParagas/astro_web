@@ -1,0 +1,95 @@
+---
+// ライト/ダークの切り替えボタン。
+// 初期値の決定(localStorage → OSの設定)は BaseLayout.astro のhead内スクリプトが担当し、
+// ここは押されたときの切り替えと、他の場所への通知(themechangeイベント)だけを持つ。
+---
+
+<button type="button" class="theme-toggle" aria-pressed="false">
+  <span class="icon sun" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"></path>
+    </svg>
+  </span>
+  <span class="icon moon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+    </svg>
+  </span>
+  <span class="label to-dark">Dark</span>
+  <span class="label to-light">Light</span>
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>(".theme-toggle");
+
+  function sync(theme: string) {
+    document.documentElement.dataset.theme = theme;
+    if (button) {
+      const dark = theme === "dark";
+      button.setAttribute("aria-pressed", String(dark));
+      // ボタンは「押すとどうなるか」をラベルにする
+      button.setAttribute(
+        "aria-label",
+        dark ? "ライトモードに切り替える" : "ダークモードに切り替える",
+      );
+    }
+    // giscusなど、CSS変数では色を変えられない相手に知らせる
+    document.dispatchEvent(new CustomEvent("themechange", { detail: theme }));
+  }
+
+  sync(document.documentElement.dataset.theme ?? "light");
+
+  button?.addEventListener("click", () => {
+    const next =
+      document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    try {
+      localStorage.setItem("theme", next);
+    } catch {
+      // 保存できなくても切り替え自体はできるようにする
+    }
+    sync(next);
+  });
+</script>
+
+<style>
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .theme-toggle:hover {
+    color: var(--text-strong);
+    border-color: var(--border-strong);
+  }
+  .icon {
+    display: flex;
+  }
+  /*
+   * 今のテーマではなく「押したらどうなるか」を出す(ライト時は Dark/月)。
+   * JSではなくCSSで出し分けているので、切り替え直後に文字がちらつかない。
+   */
+  .sun,
+  .to-light {
+    display: none;
+  }
+  :global(:root[data-theme="dark"]) .sun {
+    display: flex;
+  }
+  :global(:root[data-theme="dark"]) .to-light {
+    display: inline;
+  }
+  :global(:root[data-theme="dark"]) .moon,
+  :global(:root[data-theme="dark"]) .to-dark {
+    display: none;
+  }
+</style>

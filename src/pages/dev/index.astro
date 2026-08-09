@@ -10,6 +10,10 @@ const notes = await getCollection("dev");
   <header class="hero">
     <p class="eyebrow">dev</p>
     <h1>技術メモ</h1>
+    <nav class="sub-nav">
+      <a href="/dev/series/">シリーズ</a>
+      <a href="/dev/tags/">タグ</a>
+    </nav>
   </header>
 
   <NoteList notes={notes} basePath="/dev/" />

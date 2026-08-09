@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import NoteList from "../../../components/NoteList.astro";
+import { collectSeries } from "../../../lib/notes";
+
+export async function getStaticPaths() {
+  const notes = await getCollection("recipe");
+  return collectSeries(notes).map((series) => ({
+    params: { series: series.key },
+    props: { series },
+  }));
+}
+
+const { series } = Astro.props;
+---
+
+<BaseLayout
+  title={`${series.title} | recipe | NasParagas's home`}
+  description={series.description}
+>
+  <header class="hero">
+    <p class="eyebrow"><a href="/recipe/series/">シリーズ</a></p>
+    <h1>{series.title}</h1>
+    {series.description && <p class="lead">{series.description}</p>}
+  </header>
+
+  <NoteList notes={series.notes} basePath="/recipe/" presorted numbered />
+</BaseLayout>

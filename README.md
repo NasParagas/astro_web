@@ -1,3 +1,3 @@
 # astro_web
 
-https://nasparagas.jp
+https://nasparagas.jp/dev/

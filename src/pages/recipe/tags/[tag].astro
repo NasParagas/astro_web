@@ -1,0 +1,28 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import NoteList from "../../../components/NoteList.astro";
+import { collectTags, notesWithTag } from "../../../lib/notes";
+
+export async function getStaticPaths() {
+  const notes = await getCollection("recipe");
+  return collectTags(notes).map(({ tag }) => ({
+    params: { tag },
+    props: { tag, notes: notesWithTag(notes, tag) },
+  }));
+}
+
+const { tag, notes } = Astro.props;
+---
+
+<BaseLayout
+  title={`#${tag} | recipe | NasParagas's home`}
+  description={`#${tag} が付いた料理メモ`}
+>
+  <header class="hero">
+    <p class="eyebrow"><a href="/recipe/tags/">タグ</a></p>
+    <h1>#{tag}</h1>
+  </header>
+
+  <NoteList notes={notes} basePath="/recipe/" />
+</BaseLayout>

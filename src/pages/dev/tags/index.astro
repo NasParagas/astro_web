@@ -1,0 +1,19 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import TagIndex from "../../../components/TagIndex.astro";
+
+const notes = await getCollection("dev");
+---
+
+<BaseLayout
+  title="タグ | dev | NasParagas's home"
+  description="技術メモのタグ一覧"
+>
+  <header class="hero">
+    <p class="eyebrow"><a href="/dev/">dev</a></p>
+    <h1>タグ</h1>
+  </header>
+
+  <TagIndex notes={notes} basePath="/dev/" />
+</BaseLayout>

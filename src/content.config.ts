@@ -8,6 +8,14 @@ const noteSchema = z.object({
   date: z.coerce.date().optional(),
   description: z.string().optional(),
   tags: z.array(z.string()).default([]),
+  // 書きかけのメモは wip にすると一覧・記事ページに「作成中」が出る。
+  // 省略時は done(完成)扱いで何も出ない
+  status: z.enum(["wip", "done"]).default("done"),
+  // シリーズもの。あとから足せる(例: series: jisaku-os)。
+  // 表示名や説明を付けたくなったら src/data/series.ts に書く
+  series: z.string().optional(),
+  // シリーズ内の並び順。小さいほど先。省略した記事は作成日の古い順で後ろに並ぶ
+  seriesOrder: z.number().optional(),
   // URLを固定したいときに書く。書いておけばファイル名やディレクトリを変えても
   // リンクが切れない(省略時はファイル名がそのままURLになる)
   slug: z.string().optional(),
@@ -29,8 +37,14 @@ const keepFilename = ({
   entry: string;
   data: Record<string, unknown>;
 }) => {
-  if (typeof data.slug === "string" && data.slug.length > 0) return data.slug;
-  return entry.replace(/\.[^.]+$/, "");
+  // ファイル名をコピペして `slug: foo.md` と書きがちなので拡張子と前後の / は落とす
+  const normalize = (value: string) =>
+    value.replace(/\.(md|markdown)$/i, "").replace(/^\/+|\/+$/g, "");
+
+  if (typeof data.slug === "string" && normalize(data.slug).length > 0) {
+    return normalize(data.slug);
+  }
+  return normalize(entry);
 };
 
 // CI(Cloudflare Workers Buildsなど)は最新コミットだけの浅いクローンをするため、

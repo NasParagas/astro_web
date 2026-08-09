@@ -1,0 +1,19 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import SeriesIndex from "../../../components/SeriesIndex.astro";
+
+const notes = await getCollection("recipe");
+---
+
+<BaseLayout
+  title="シリーズ | recipe | NasParagas's home"
+  description="料理メモのシリーズ一覧"
+>
+  <header class="hero">
+    <p class="eyebrow"><a href="/recipe/">recipe</a></p>
+    <h1>シリーズ</h1>
+  </header>
+
+  <SeriesIndex notes={notes} basePath="/recipe/" />
+</BaseLayout>

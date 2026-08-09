@@ -1,6 +1,5 @@
-import type { CollectionEntry } from "astro:content";
-
-type Note = CollectionEntry<"dev"> | CollectionEntry<"recipe">;
+// 型だけのimportなのでビルド時に消える(notes.ts側はここの関数を使うが循環しない)
+import type { Note } from "./notes";
 
 /**
  * メモの作成日・最終更新日を返す。

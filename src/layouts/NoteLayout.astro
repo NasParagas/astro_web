@@ -1,18 +1,19 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 import Comments from "../components/Comments.astro";
-import { formatDate } from "../lib/dates";
+import SeriesNav from "../components/SeriesNav.astro";
+import StatusBadge from "../components/StatusBadge.astro";
+import TagChips from "../components/TagChips.astro";
+import { formatDate, noteDates } from "../lib/dates";
+import { isWip, type Note } from "../lib/notes";
 
 interface Props {
-  title: string;
-  created: Date;
-  updated: Date;
-  description?: string;
-  // frontmatterのcommentTerm(省略時はComments側でページのパスを使う)
-  commentTerm?: string;
+  note: Note;
 }
 
-const { title, created, updated, description, commentTerm } = Astro.props;
+const { note } = Astro.props;
+const { title, description, commentTerm } = note.data;
+const { created, updated } = noteDates(note);
 // 同じ日のうちの更新は表示しない
 const showUpdated = formatDate(updated) !== formatDate(created);
 ---
@@ -29,12 +30,22 @@ const showUpdated = formatDate(updated) !== formatDate(created);
           </span>
         )
       }
+      <StatusBadge note={note} />
     </p>
+    <TagChips note={note} />
   </header>
+
+  {
+    isWip(note) && (
+      <p class="wip-notice">このメモは書きかけです。本当にただのメモ書きのような見た目だったり、その内容が変わる可能性があります。</p>
+    )
+  }
 
   <article class="prose">
     <slot />
   </article>
+
+  <SeriesNav note={note} />
 
   <Comments term={commentTerm} />
 </BaseLayout>
@@ -44,17 +55,31 @@ const showUpdated = formatDate(updated) !== formatDate(created);
     margin: 0;
     font-size: clamp(1.75rem, 5vw, 2.5rem);
     line-height: 1.3;
-    color: #111827;
+    color: var(--text-strong);
   }
   .date {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
     margin: 12px 0 0;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 0.9rem;
+  }
+  .wip-notice {
+    padding: 12px 20px;
+    margin: 0 0 32px;
+    color: var(--wip-text);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    background: var(--wip-notice-bg);
+    border: 1px solid var(--wip-border);
+    border-radius: 12px;
   }
   .note-header {
     padding-bottom: 24px;
     margin-bottom: 32px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border);
   }
 
   /* Markdown本文はスコープ外から来るので :global で当てる */
@@ -65,7 +90,7 @@ const showUpdated = formatDate(updated) !== formatDate(created);
     margin: 2.5em 0 0.75em;
     padding-bottom: 0.3em;
     font-size: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border);
   }
   .prose :global(h3) {
     margin: 2em 0 0.5em;
@@ -84,7 +109,7 @@ const showUpdated = formatDate(updated) !== formatDate(created);
   .prose :global(code) {
     padding: 0.15em 0.4em;
     font-size: 0.9em;
-    background: #e2e8f0;
+    background: var(--surface-strong);
     border-radius: 6px;
   }
   .prose :global(pre) {
@@ -99,8 +124,8 @@ const showUpdated = formatDate(updated) !== formatDate(created);
   .prose :global(blockquote) {
     margin: 1em 0;
     padding: 0.25em 1.25em;
-    color: #475569;
-    border-left: 4px solid #cbd5e1;
+    color: var(--text-body);
+    border-left: 4px solid var(--border-strong);
   }
   .prose :global(img) {
     max-width: 100%;
@@ -114,6 +139,6 @@ const showUpdated = formatDate(updated) !== formatDate(created);
   .prose :global(th),
   .prose :global(td) {
     padding: 6px 12px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
   }
 </style>

@@ -1,0 +1,125 @@
+---
+// 記事ページ下部の「このシリーズの他の記事」ナビ。
+// frontmatterに series が無い記事では何も描画しない。
+import { getCollection } from "astro:content";
+import { noteHref, notesInSeries, seriesInfo, type Note } from "../lib/notes";
+
+interface Props {
+  note: Note;
+}
+
+const { note } = Astro.props;
+const key = note.data.series;
+
+// devとrecipeはスキーマが同じなので、型を通すためにどちらかにキャストして読む
+const all = key ? await getCollection(note.collection as "dev") : [];
+const siblings = key ? notesInSeries(all, key) : [];
+const current = siblings.findIndex((sibling) => sibling.id === note.id);
+const info = key ? seriesInfo(key) : null;
+const prev = current > 0 ? siblings[current - 1] : undefined;
+const next = current >= 0 ? siblings[current + 1] : undefined;
+---
+
+{
+  key && info && siblings.length > 0 && (
+    <nav class="series" aria-label="シリーズ内の記事">
+      <p class="series-head">
+        <span class="series-label">シリーズ</span>
+        <a class="series-title" href={`/${note.collection}/series/${key}/`}>
+          {info.title}
+        </a>
+        <span class="series-count">
+          全{siblings.length}回 / 第{current + 1}回
+        </span>
+      </p>
+
+      <ol class="series-list">
+        {siblings.map((sibling) => (
+          <li>
+            {sibling.id === note.id ? (
+              <span aria-current="page">{sibling.data.title}</span>
+            ) : (
+              <a href={noteHref(sibling)}>{sibling.data.title}</a>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      {(prev || next) && (
+        <div class="series-pager">
+          {prev ? (
+            <a class="prev" href={noteHref(prev)}>
+              ← {prev.data.title}
+            </a>
+          ) : (
+            <span />
+          )}
+          {next && (
+            <a class="next" href={noteHref(next)}>
+              {next.data.title} →
+            </a>
+          )}
+        </div>
+      )}
+    </nav>
+  )
+}
+
+<style>
+  .series {
+    padding: 20px 24px;
+    margin-top: 48px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .series-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0 0 12px;
+  }
+  .series-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .series-title {
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .series-title:hover {
+    text-decoration: underline;
+  }
+  .series-count {
+    color: var(--text-faint);
+    font-size: 0.85rem;
+  }
+  .series-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 1.4em;
+    margin: 0;
+    line-height: 1.6;
+  }
+  .series-list [aria-current="page"] {
+    color: var(--text-strong);
+    font-weight: 700;
+  }
+  .series-pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 16px;
+    margin-top: 16px;
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border);
+  }
+  .series-pager .next {
+    margin-left: auto;
+    text-align: right;
+  }
+</style>

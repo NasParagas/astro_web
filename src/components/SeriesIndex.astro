@@ -1,0 +1,89 @@
+---
+import { collectSeries, type Note } from "../lib/notes";
+import { formatDate, noteDates } from "../lib/dates";
+
+interface Props {
+  notes: Note[];
+  basePath: string;
+}
+
+const { notes, basePath } = Astro.props;
+const series = collectSeries(notes);
+const updatedAt = (items: Note[]) =>
+  new Date(Math.max(...items.map((note) => noteDates(note).created.valueOf())));
+---
+
+{
+  series.length === 0 ? (
+    <p class="empty">
+      まだシリーズがありません。メモのfrontmatterに <code>series:</code>{" "}
+      を書くとここに出ます。
+    </p>
+  ) : (
+    <ul class="series-index">
+      {series.map((entry) => (
+        <li>
+          <a href={`${basePath}series/${entry.key}/`} class="series-card">
+            <span class="series-name">{entry.title}</span>
+            {entry.description && (
+              <span class="series-description">{entry.description}</span>
+            )}
+            <span class="series-meta">
+              全{entry.notes.length}回 ・ 最新{" "}
+              {formatDate(updatedAt(entry.notes))}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .empty {
+    color: var(--text-muted);
+  }
+  .series-index {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .series-card {
+    display: block;
+    padding: 20px 24px;
+    color: inherit;
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      border-color 160ms ease;
+  }
+  .series-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-3);
+  }
+  .series-name {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .series-description {
+    display: block;
+    margin-top: 6px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .series-meta {
+    display: block;
+    margin-top: 10px;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+  }
+</style>

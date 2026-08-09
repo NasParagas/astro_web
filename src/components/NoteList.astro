@@ -1,14 +1,19 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import { isWip, type Note } from "../lib/notes";
+import StatusBadge from "./StatusBadge.astro";
 import { noteDates, formatDate, sortByCreatedDesc } from "../lib/dates";
 
 interface Props {
-  notes: (CollectionEntry<"dev"> | CollectionEntry<"recipe">)[];
+  notes: Note[];
   basePath: string;
+  /** 渡された順のまま表示する(シリーズ順など、作成日順にしたくないとき) */
+  presorted?: boolean;
+  /** 「第N回」を表示する(シリーズ一覧用) */
+  numbered?: boolean;
 }
 
-const { notes, basePath } = Astro.props;
-const sorted = sortByCreatedDesc(notes);
+const { notes, basePath, presorted = false, numbered = false } = Astro.props;
+const sorted = presorted ? notes : sortByCreatedDesc(notes);
 ---
 
 {
@@ -16,11 +21,17 @@ const sorted = sortByCreatedDesc(notes);
     <p class="empty">まだメモがありません。</p>
   ) : (
     <ul class="note-list">
-      {sorted.map((note) => {
+      {sorted.map((note, index) => {
         const { created } = noteDates(note);
         return (
           <li>
             <a href={`${basePath}${note.id}/`} class="note-link">
+              {(numbered || isWip(note)) && (
+                <span class="note-meta">
+                  <StatusBadge note={note} />
+                  {numbered && <span class="note-number">第{index + 1}回</span>}
+                </span>
+              )}
               <span class="note-title">{note.data.title}</span>
               {note.data.description && (
                 <span class="note-description">{note.data.description}</span>
@@ -38,7 +49,7 @@ const sorted = sortByCreatedDesc(notes);
 
 <style>
   .empty {
-    color: #64748b;
+    color: var(--text-muted);
   }
   .note-list {
     display: flex;
@@ -53,8 +64,8 @@ const sorted = sortByCreatedDesc(notes);
     padding: 20px 24px;
     color: inherit;
     text-decoration: none;
-    background: white;
-    border: 1px solid #e5e7eb;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
     transition:
       transform 160ms ease,
@@ -63,8 +74,21 @@ const sorted = sortByCreatedDesc(notes);
   }
   .note-link:hover {
     transform: translateY(-2px);
-    border-color: #cbd5e1;
-    box-shadow: 0 12px 30px rgb(15 23 42 / 0.08);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-3);
+  }
+  .note-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .note-number {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
   }
   .note-title {
     display: block;
@@ -75,13 +99,13 @@ const sorted = sortByCreatedDesc(notes);
   .note-description {
     display: block;
     margin-top: 6px;
-    color: #64748b;
+    color: var(--text-muted);
     line-height: 1.7;
   }
   .note-date {
     display: block;
     margin-top: 10px;
-    color: #94a3b8;
+    color: var(--text-faint);
     font-size: 0.85rem;
   }
 </style>

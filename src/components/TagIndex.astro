@@ -1,0 +1,67 @@
+---
+import { collectTags, type Note } from "../lib/notes";
+
+interface Props {
+  notes: Note[];
+  basePath: string;
+}
+
+const { notes, basePath } = Astro.props;
+const tags = collectTags(notes);
+---
+
+{
+  tags.length === 0 ? (
+    <p class="empty">
+      まだタグがありません。メモのfrontmatterに <code>tags:</code>{" "}
+      を書くとここに出ます。
+    </p>
+  ) : (
+    <ul class="tag-index">
+      {tags.map(({ tag, count }) => (
+        <li>
+          <a href={`${basePath}tags/${encodeURIComponent(tag)}/`}>
+            <span class="tag-name">#{tag}</span>
+            <span class="tag-count">{count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .empty {
+    color: var(--text-muted);
+  }
+  .tag-index {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .tag-index a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    color: var(--text);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .tag-index a:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-1);
+  }
+  .tag-name {
+    font-weight: 600;
+  }
+  .tag-count {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+</style>
